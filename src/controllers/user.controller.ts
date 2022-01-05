@@ -19,6 +19,7 @@ import {
   response,
 } from '@loopback/rest';
 import {authenticate, STRATEGY} from 'loopback4-authentication';
+import {authorize} from 'loopback4-authorization';
 import {
   PasswordHasherBindings,
   TokenServiceBindings,
@@ -27,6 +28,7 @@ import {
 import {User} from '../models';
 import {UserRepository} from '../repositories';
 import {JWTService, PasswordHasher, UserManagementService} from '../services';
+import {PermissionKey} from '../utils/permissions.enum';
 import {CredentialsRequestBody} from './specs/user-controller.specs';
 export class UserController {
   constructor(
@@ -75,6 +77,7 @@ export class UserController {
       username,
       password,
     });
+
     const token = await this.jwtService.generateToken(verifiedUser);
     return {token};
   }
@@ -123,13 +126,17 @@ export class UserController {
     return this.userRepository.updateAll(user, where);
   }
 
-  @authenticate(STRATEGY.BEARER)
-  @get('/users/{id}')
-  @response(200, {
-    description: 'User model instance',
-    content: {
-      'application/json': {
-        schema: getModelSchemaRef(User, {includeRelations: true}),
+  @authenticate(STRATEGY.BEARER, {
+    passReqToCallback: true,
+  })
+  @authorize({permissions: [PermissionKey.ViewOwnUser]})
+  @get('/users/{id}', {
+    responses: {
+      description: 'user model instance',
+      content: {
+        'application/json': {
+          schema: getModelSchemaRef(User, {includeRelations: true}),
+        },
       },
     },
   })

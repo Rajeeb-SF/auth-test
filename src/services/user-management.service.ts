@@ -3,7 +3,6 @@ import {repository} from '@loopback/repository';
 import {HttpErrors} from '@loopback/rest';
 import {PasswordHasher} from '.';
 import {PasswordHasherBindings} from '../keys';
-import {User} from '../models';
 import {UserRepository} from '../repositories';
 
 export class UserManagementService {
@@ -17,7 +16,7 @@ export class UserManagementService {
   async verifyCredentials(credentials: {
     password: string;
     username: string;
-  }): Promise<User> {
+  }): Promise<any> {
     const {username, password} = credentials;
     const invalidCredentialsError = 'Invalid username or password.';
     if (!username) {
@@ -38,7 +37,7 @@ export class UserManagementService {
     if (!passwordMatched) {
       throw new HttpErrors.Unauthorized(invalidCredentialsError);
     }
-
-    return foundUser;
+    const userRole = await this.userRepository.role(foundUser.id);
+    return {...foundUser, role: userRole};
   }
 }

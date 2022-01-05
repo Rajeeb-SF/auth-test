@@ -1,6 +1,6 @@
 import {HttpErrors} from '@loopback/rest';
 import {promisify} from 'util';
-import {User} from '../models';
+import {UserWithRole} from '../models';
 
 const jwt = require('jsonwebtoken');
 const signAsync = promisify(jwt.sign);
@@ -8,7 +8,7 @@ const signAsync = promisify(jwt.sign);
 export class JWTService {
   constructor() {}
 
-  async generateToken(userProfile: User): Promise<string> {
+  async generateToken(userProfile: UserWithRole): Promise<string> {
     if (!userProfile) {
       throw new HttpErrors.Unauthorized(
         'Error generating token : userProfile is null',
@@ -16,7 +16,9 @@ export class JWTService {
     }
     const userInfoForToken = {
       firstName: userProfile.firstName,
+      lastName: userProfile.lastName,
       userId: userProfile.id,
+      role: userProfile.role,
     };
     // Generate a JSON Web Token
     let token: string;
