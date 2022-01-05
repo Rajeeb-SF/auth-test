@@ -1,5 +1,7 @@
-import {Entity, model, property} from '@loopback/repository';
+import {Entity, model, property, belongsTo} from '@loopback/repository';
 import {IAuthUser} from 'loopback4-authentication';
+import {Role} from './role.model';
+
 @model({settings: {strict: false}})
 export class User extends Entity implements IAuthUser {
   @property({
@@ -42,6 +44,9 @@ export class User extends Entity implements IAuthUser {
     type: 'string',
   })
   password?: string;
+
+  @belongsTo(() => Role)
+  roleId: number;
   // Define well-known properties here
 
   // Indexer property to allow additional data
